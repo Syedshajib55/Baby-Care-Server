@@ -8,53 +8,53 @@ const stripe = require('stripe')(process.env.STRIPE_SECRET)
 const app = express()
 const port = process.env.PORT || 5000
 
+
 // middleware
 app.use(cors())
 app.use(express.json())
 
-
 // database 
-const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.dejzn.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
+const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.19uqr.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
 
 async function run() {
     try {
         await client.connect()
-        const carCollection = client.db('modernCarDb').collection('products')
-        const orderCollection = client.db('modernCarDb').collection('orders')
-        const userCollection = client.db('modernCarDb').collection('users')
-        const ratingCollection = client.db('modernCarDb').collection('ratings')
+        console.log('Hitting the db');
+        const productCollection = client.db('BabyCare').collection('products')
+        const orderCollection = client.db('BabyCare').collection('orders')
+        const userCollection = client.db('BabyCare').collection('users')
+        const reviewCollection = client.db('BabyCare').collection('reviews')
 
-        // get all products from db
+        // get all products from  db
         app.get('/products', async (req, res) => {
             const page = req.query.page;
             const size = parseInt(req.query.size);
             let result;
-            const count = await carCollection.find({}).count()
+            const count = await productCollection.find({}).count()
             if (page) {
-                result = await carCollection.find({}).skip(page * size).limit(size).toArray();
+                result = await productCollection.find({}).skip(page * size).limit(size).toArray();
             } else {
-                result = await carCollection.find().toArray()
+                result = await productCollection.find().toArray()
             }
-
             res.json({
                 count,
                 result
             })
         })
-        // get single product
+        // // get single product
         app.get('/products/:id', async (req, res) => {
-            const result = await carCollection.findOne({ _id: ObjectId(req.params.id) })
+            const result = await productCollection.findOne({ _id: ObjectId(req.params.id) })
             res.json(result)
         })
         //add a new product to db
         app.post('/products', async (req, res) => {
-            const result = await carCollection.insertOne(req.body)
+            const result = await productCollection.insertOne(req.body)
             res.json(result)
         })
         // delete product from db
         app.delete('/delete/:id', async (req, res) => {
-            const result = await carCollection.deleteOne({ _id: ObjectId(req.params.id) })
+            const result = await productCollection.deleteOne({ _id: ObjectId(req.params.id) })
             res.json(result)
         })
         //place order
@@ -74,6 +74,7 @@ async function run() {
             const result = await orderCollection.find().toArray()
             res.json(result)
         })
+        //delete a single order
         app.delete('/delete-order/:id', async (req, res) => {
             const result = await orderCollection.deleteOne({ _id: ObjectId(req.params.id) })
             res.json(result)
@@ -153,13 +154,13 @@ async function run() {
             res.json({ admin: isAdmin })
         })
 
-        // add rating to db
-        app.post('/rating', async (req, res) => {
-            const result = await ratingCollection.insertOne(req.body)
+        // add reviews to db
+        app.post('/reviews', async (req, res) => {
+            const result = await reviewCollection.insertOne(req.body)
             res.json(result)
         })
-        app.get('/rating', async (req, res) => {
-            const result = await ratingCollection.find().toArray()
+        app.get('/reviews', async (req, res) => {
+            const result = await reviewCollection.find().toArray()
             res.json(result)
         })
 
@@ -182,7 +183,7 @@ async function run() {
 run().catch(console.dir)
 
 app.get('/', (req, res) => {
-    res.send('MCH server is running.')
+    res.send('BabyCare server is running.')
 })
 app.listen(port, () => {
     console.log('Port running at', port)
