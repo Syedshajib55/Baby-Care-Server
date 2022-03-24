@@ -8,7 +8,6 @@ const stripe = require('stripe')(process.env.STRIPE_SECRET)
 const app = express()
 const port = process.env.PORT || 5000
 
-
 // middleware
 app.use(cors())
 app.use(express.json())
@@ -16,7 +15,7 @@ app.use(express.json())
 // database 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.19uqr.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
-
+// console.log(uri);
 async function run() {
     try {
         await client.connect()
@@ -114,7 +113,16 @@ async function run() {
             const id = req.params.id
             const result = await orderCollection.updateOne({ _id: ObjectId(id) }, {
                 $set: {
-                    status: 'on the way',
+                    status: 'On The Way',
+                }
+            })
+            res.json(result);
+        })
+        app.put('/updateStatus2/:id', async (req, res) => {
+            const id = req.params.id
+            const result = await orderCollection.updateOne({ _id: ObjectId(id) }, {
+                $set: {
+                    status: 'Received',
                 }
             })
             res.json(result);
