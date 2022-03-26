@@ -24,6 +24,7 @@ async function run() {
         const orderCollection = client.db('BabyCare').collection('orders')
         const userCollection = client.db('BabyCare').collection('users')
         const reviewCollection = client.db('BabyCare').collection('reviews')
+        const appointmentsCollection = client.db('BabyCare').collection('appointments')
 
         // get all products from  db
         app.get('/products', async (req, res) => {
@@ -41,7 +42,26 @@ async function run() {
                 result
             })
         })
-        // // get single product
+        //Get Appointment
+        app.get('/appointments', async (req, res) => {
+            const email = req.query.email;
+            const date = new Date(req.query.date).toLocaleDateString();
+            // console.log(date);
+            const query = { email: email, date: date }
+            
+            const cursor = appointmentsCollection.find(query);
+            const appointments = await cursor.toArray();
+            res.json(appointments);
+        })
+        //Post Appointment
+        app.post('/appointments', async (req, res) => {
+            const appointment = req.body;
+            const result = await appointmentsCollection.insertOne(appointment);
+            // console.log(result);
+            res.json(result)
+        });
+
+        //  get single product
         app.get('/products/:id', async (req, res) => {
             const result = await productCollection.findOne({ _id: ObjectId(req.params.id) })
             res.json(result)
