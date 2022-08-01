@@ -1,5 +1,6 @@
 const express = require('express')
 const { MongoClient } = require('mongodb');
+//Cross-Origin Resource Sharing
 const cors = require('cors')
 const ObjectId = require('mongodb').ObjectId
 require('dotenv').config()
@@ -22,6 +23,7 @@ async function run() {
         console.log('Hitting the db');
         const productCollection = client.db('BabyCare').collection('products')
         const orderCollection = client.db('BabyCare').collection('orders')
+        const userAddressCollection = client.db('BabyCare').collection('userAddress')
         const userCollection = client.db('BabyCare').collection('users')
         const reviewCollection = client.db('BabyCare').collection('reviews')
         const appointmentsCollection = client.db('BabyCare').collection('appointments')
@@ -61,6 +63,28 @@ async function run() {
             res.json(result)
         });
 
+        //single appointments
+        app.get('/appointments/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            const result = await appointmentsCollection.findOne(query);
+            res.json(result);
+        })
+
+        //Update appointments
+        app.put('/appointments/:id', async (req, res) => {
+            const id = req.params.id;
+            const payment = req.body;
+            const filter = { _id: ObjectId(id) };
+            const updateDoc = {
+                $set: {
+                    payment: payment
+                }
+            };
+            const result = await appointmentsCollection.updateOne(filter, updateDoc);
+            res.json(result);
+        })
+
         //  get single product
         app.get('/products/:id', async (req, res) => {
             const result = await productCollection.findOne({ _id: ObjectId(req.params.id) })
@@ -81,8 +105,20 @@ async function run() {
             const result = await orderCollection.insertOne(req.body)
             res.json(result)
         })
+        //save address of users
+        app.post('/userAddress', async (req, res) => {
+            const result = await userAddressCollection.insertOne(req.body)
+            res.json(result)
+        })
         // get single email ordered product
         app.get('/orders', async (req, res) => {
+            const email = req.query.email
+            const query = { email: email }
+            const result = await orderCollection.find(query).toArray()
+            res.json(result)
+        })
+        //get userAddress
+        app.get('/userAddress', async (req, res) => {
             const email = req.query.email
             const query = { email: email }
             const result = await orderCollection.find(query).toArray()
@@ -102,7 +138,7 @@ async function run() {
         app.get('/payment/:id', async (req, res) => {
             const id = req.params.id
             const query = { _id: ObjectId(id) }
-            const result = await orderCollection.findOne(query)
+            const result = await userAddressCollection.findOne(query)
             res.json(result)
         })
         // update order after payment successfull
@@ -115,7 +151,7 @@ async function run() {
                     payment: payment
                 }
             }
-            const result = await orderCollection.updateOne(filter, updateDoc)
+            const result = await userAddressCollection.updateOne(filter, updateDoc)
             res.json(result)
         })
 
@@ -129,6 +165,7 @@ async function run() {
             })
             res.json(result);
         })
+        //Update order status after payment
         app.put('/updateStatus1/:id', async (req, res) => {
             const id = req.params.id
             const result = await orderCollection.updateOne({ _id: ObjectId(id) }, {
@@ -138,6 +175,7 @@ async function run() {
             })
             res.json(result);
         })
+        
         app.put('/updateStatus2/:id', async (req, res) => {
             const id = req.params.id
             const result = await orderCollection.updateOne({ _id: ObjectId(id) }, {
@@ -147,7 +185,6 @@ async function run() {
             })
             res.json(result);
         })
-
         // add user to db
         app.post('/users', async (req, res) => {
             const result = await userCollection.insertOne(req.body)
