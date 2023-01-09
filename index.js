@@ -71,7 +71,7 @@ async function run() {
             res.json(result);
         })
 
-        //Update appointments
+        //Update appointmentss
         app.put('/appointments/:id', async (req, res) => {
             const id = req.params.id;
             const payment = req.body;
