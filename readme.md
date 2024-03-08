@@ -4,15 +4,13 @@ Live Website Link:-
 
 Client Side Code: https://github.com/Syedshajib55/Baby-Care
 
-### Feature of this Applicaion
+### Feature of this Application
 
-* Server Intregation
+* Server Integration
 * Rest Api Used
 
-### Technology Used
+### Backend Technology Used
 
 * Node Js
 * Express Js
-* MongoDb Atlas
-* cors
-* dotenv
+* MongoDB Atlas
